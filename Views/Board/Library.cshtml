@@ -1,0 +1,164 @@
+﻿<div style="display:none;">
+
+    <canvas id="canvas"></canvas>
+</div>
+
+<div class="container">
+
+    <h2 class="text-center my-3">Board Library</h2>
+    <table class="display custom-table" id="boardTable">
+        <thead>
+            <tr>
+                <th style="width: 15%;">Thumbnail</th>
+                <th style="width: 55%;">Title</th>
+                <th style="width: 15%;">Owner</th>
+                <th style="width: 15%;">Date</th>
+            </tr>
+        </thead>
+        <tbody id="libraryTableBody">
+            
+        </tbody>
+    </table>
+</div>
+
+
+<script>
+   
+
+</script>
+
+
+@section Scripts {
+    <script src="~/js/fabric.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
+    <script>
+
+        $(document).ready(function() {
+
+            const canvas = new fabric.Canvas('canvas', {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                backgroundColor: '#fff'
+            });
+
+            function getFormatedDate(dateString) {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                const date = new Date(dateString);
+                const formattedDate = date.toLocaleDateString('en-US', options);
+                return formattedDate;
+            }
+
+
+            async function getCanvasThumbnail(canvasData) {
+                await loadCanvasFromDb(canvasData);
+
+                let dataURL =  canvas.toDataURL({
+                    format: 'png',
+                    quality: 1.0
+                });
+
+                console.log(dataURL);
+                return dataURL;
+            }
+
+            async function populateTable(users) {
+                const tableBody = document.getElementById('libraryTableBody');
+
+                for (const user of users) {
+                    console.log(user);
+
+                    for (const board of user.boards) {
+
+                        const row = document.createElement('tr');
+                        row.className = 'board-item';
+
+                        const thumbnailCell = document.createElement('td');
+                        const titleCell = document.createElement('td');
+                        const ownerCell = document.createElement('td');
+                        const dateCell = document.createElement('td');
+
+                        thumbnailCell.className = 'thumbnail';
+                        const thumbnailImg = document.createElement('img');
+                        const thumbnailSrc = await getCanvasThumbnail(board.canvasObjects);
+                        thumbnailImg.src = thumbnailSrc;
+                        thumbnailImg.alt = '';
+                        thumbnailCell.appendChild(thumbnailImg);
+
+                        titleCell.className = 'board-title';
+                        titleCell.textContent = board.title;
+
+                        ownerCell.className = 'board-owner';
+                        const ownerNameP = document.createElement('p');
+                        ownerNameP.textContent = user.fullName;
+                        const ownerEmailSpan = document.createElement('span');
+                        ownerEmailSpan.textContent = user.email;
+                        ownerCell.appendChild(ownerNameP);
+                        ownerCell.appendChild(ownerEmailSpan);
+
+                        dateCell.className = 'board-date';
+                        const dateP = document.createElement('p');
+                        dateP.textContent = getFormatedDate(board.date);
+                        dateCell.appendChild(dateP);
+
+                        row.appendChild(thumbnailCell);
+                        row.appendChild(titleCell);
+                        row.appendChild(ownerCell);
+                        row.appendChild(dateCell);
+
+                        tableBody.appendChild(row);
+                    }
+                }
+            }
+
+           
+
+            function applyObjectChange(objectId, objectData) {
+                fabric.util.enlivenObjects([JSON.parse(objectData)], function (objects) {
+                    if (objects.length > 0) {
+                        const object = objects[0];
+                        // console.log(object);
+                        canvas.add(object);
+                        canvas.renderAll();
+                    }
+                });
+            }
+
+            async function loadCanvasFromDb(canvasObjects) {
+                // console.log(canvasObjects);
+                canvasObjects.forEach(obj => {
+                    // console.log(obj);
+                    applyObjectChange(obj.objectId, obj.objectData);
+                });
+
+                console.log(canvas.toJSON());
+            }
+
+            
+  
+            function inilializeDataTable() {
+                var table = $('#boardTable').DataTable({
+                    lengthChange: true,
+                    initComplete: function () {
+                        var searchInput = $('.dataTables_filter input');
+                    }
+                });
+                $('#boardTable').removeClass('dataTable');
+            }
+            
+           function getBoardData() {
+                fetch('GetAllUsersBoards')
+                   .then(response => response.json())
+                   .then(data => populateTable(data))
+                   .then(() => inilializeDataTable());
+           }
+
+
+            getBoardData();
+
+
+        });
+
+    </script>
+
+}

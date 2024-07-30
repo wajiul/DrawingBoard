@@ -1,0 +1,199 @@
+﻿@model User
+
+<div style="display:none;">
+
+    <canvas id="canvas"></canvas>
+</div>
+
+<div class="container">
+    <h1 class="text-center">My Board</h1>
+
+    <a asp-action="AddNewBoard" asp-route-userId="@Model.UserId" class="btn btn-primary mb-3">Create New</a>
+
+    <div id="myBoard" class="row g-3 justify-content-center">
+        
+    </div>
+</div>
+
+<!--Confirm Delete Modal-->
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false">
+    <div class="modal-dialog modal-dialog-centered modal-delete">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <h5 class="modal-title text-center" id="exampleModalLabel">Are you sure ?</h5>
+                <img class="modal-img" src="~/images/icons8-delete-144.png">
+            </div>
+            <div class="modal-footer d-flex">
+                <a type="button" class="btn btn-primary py-2 w-50" data-bs-dismiss="modal">Cancel</a>
+                <a type="button" id="confirmDeleteBtn" class="btn btn-danger py-2 w-50">Confirm</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let boardIdToDelete = null;
+
+    // Function to show the modal and store the boardId
+    function confirmDelete(boardId) {
+        boardIdToDelete = boardId;
+        $('#deleteModal').modal('show');
+    }
+
+    // Add event listener for the delete confirmation button
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+        if (boardIdToDelete) {
+            // API endpoint to delete the board
+            const deleteBoardUrl = `/board/deleteBoard?boardId=${boardIdToDelete}`;
+
+            fetch(deleteBoardUrl, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle successful response
+                console.log('Board deleted:', data);
+
+                // Close the modal
+                $('#deleteModal').modal('hide');
+
+                // Optionally, remove the card from the UI
+                document.querySelector(`[data-board-id="${boardIdToDelete}"]`).closest('.col-auto').remove();
+
+                // Reset boardIdToDelete
+                boardIdToDelete = null;
+            })
+            .catch(error => {
+                console.error('Error deleting board:', error);
+                // Handle the error
+            });
+        }
+    });
+
+</script>
+
+@section Scripts {
+    <script src="~/js/fabric.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            const canvas = new fabric.Canvas('canvas', {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                backgroundColor: '#fff'
+            });
+
+            const myBoard = document.getElementById('myBoard');
+           
+            const userId = '@Model.UserId';
+            let userData = null;
+
+            async function getCanvasThumbnail(canvasData) {
+                await loadCanvasFromDb(canvasData);
+
+                let dataURL = canvas.toDataURL({
+                    format: 'png',
+                    quality: 1.0
+                });
+
+                // console.log(dataURL);
+                return dataURL;
+            }
+
+            async function populateUserBoards(user) {
+                // console.log('user ', user);
+                userData = user;
+                myBoard.innerHTML = '';
+
+                for(const board of user.boards) {
+                    // console.log(board);
+                    const imgSrc = await getCanvasThumbnail(board.canvasObjects);
+
+                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                    const date = new Date(board.date);
+                    const formattedDate = date.toLocaleDateString('en-US', options);
+
+                    myBoard.innerHTML += getCard(imgSrc, board.title, formattedDate, board.boardId, user.fullName, user.userId);
+                }
+            }
+
+
+
+            function getCard(imageSrc, title, date, boardId, name, userId) {
+                const boardEditLink = `/board/display?boardId=${boardId}&fullName=${name}&isShared=false&userId=${userId}`;
+                const boardDeleteLink = `/board/delete?id=${boardId}`
+                return `
+                        
+                            <div class="col-auto">
+                                <div class="card card-board">
+                                    <img src="${imageSrc}" class="card-img-top">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-center text-truncate">${title}</h5>
+                                        <p class="card-date text-center">${date}</p>
+                                    </div>
+                                    <div class="card-footer d-flex">
+                                        <a href=${boardEditLink} class="btn  btn-primary w-50">Edit</a>
+                                         <button data-board-id="${boardId}" onclick="confirmDelete('${boardId}')" class="btn btn-danger w-50 delete-board-btn">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                    `;
+            }
+
+
+            function applyObjectChange(objectId, objectData) {
+                fabric.util.enlivenObjects([JSON.parse(objectData)], function (objects) {
+                    if (objects.length > 0) {
+                        const object = objects[0];
+                        // console.log(object);
+                        canvas.add(object);
+                        canvas.renderAll();
+                    }
+                });
+            }
+
+            async function loadCanvasFromDb(canvasObjects) {
+                // console.log(canvasObjects);
+                canvasObjects.forEach(obj => {
+                    // console.log(obj);
+                    applyObjectChange(obj.objectId, obj.objectData);
+                });
+
+                // console.log(canvas.toJSON());
+            }
+
+           
+            function getBoardData() {
+                let url = `GetUserAllBoards?userId=${userId}`;
+                // console.log(url);
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => populateUserBoards(data));
+            }
+
+
+            // document.querySelectorAll('.delete-board-btn').forEach(button => {
+            //     console.log(button);
+            //     button.addEventListener('click', function () {
+            //         currentBoardId = this.getAttribute('data-board-id');
+            //         $('#deleteModal').modal('show');
+            //     });
+            // });
+
+        
+            
+            getBoardData();
+
+
+        });
+
+    </script>
+
+}

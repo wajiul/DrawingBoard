@@ -1,0 +1,653 @@
+﻿
+@model BoardUser
+
+<div class="dropdown">
+    <button class="round-btn"
+            type="button"
+            id="menu-toggler"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+        <i class="bi bi-menu-up"></i>
+    </button>
+    <ul class="menu dropdown-menu mt-1 p-2 w-md-100"
+        aria-labelledby="menu-toggler">
+        @if(Model.IsShared == false)
+        {
+            
+            <li>
+                <a 
+                    asp-action="AddNewBoard" asp-controller="Board" asp-route-userId="@Model.UserId" 
+                    class="dropdown-item"> <i class="bi bi-plus me-2"></i>New
+                </a>
+            </li>
+
+            <li>
+                <a 
+                    asp-action="MyBoard" asp-controller="Board" asp-route-userId="@Model.UserId"
+                    class="dropdown-item">
+                    <i class="bi bi-person-circle me-2"></i>My board
+                </a>
+            </li>
+        }
+
+        <li class="dropdown-item" data-bs-toggle="modal" data-bs-target="#fileExportModal">
+                <i class="bi bi-download me-2"></i>Export as
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#shareLinkModal">
+                <i class="bi bi-person-plus-fill me-2"></i>Add collaborator
+            </a>
+        </li>
+        <li>
+            <a 
+                asp-action="Library" asp-controller="Board"
+                class="dropdown-item">
+                <i class="bi bi-folder2-open me-2"></i>Library
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item">
+                <i class="bi bi-arrow-clockwise me-2"></i>Reset canvas
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Menu section end  -->
+<!-- Toolbar section start  -->
+<div class="toolbar-position-control">
+    <button class="round-btn round-btn__small position-control"
+            id="left"
+            value="left">
+        <i class="bi bi-align-start"></i>
+    </button>
+    <button class="round-btn round-btn__small position-control" id="top">
+        <i class="bi bi-align-top"></i>
+    </button>
+    <button class="round-btn round-btn__small position-control" id="right">
+        <i class="bi bi-align-end"></i>
+    </button>
+    <button class="round-btn round-btn__small position-control" id="bottom">
+        <i class="bi bi-align-bottom"></i>
+    </button>
+</div>
+
+<div id="toolbar" class="toolbar toolbar__left">
+    <div class="tool-container mb-1">
+        <button id="main-pen" class="tool-btn main-btn d-tools">
+            <i class="bi bi-pen"></i>
+        </button>
+        <div class="tool-options tool-options__left">
+            <!-- <button class="tool-btn pen"><i class="bi bi-pen"></i></button>
+                  <button class="tool-btn pen"><i class="bi bi-pencil"></i></button>
+                  <button class="tool-btn pen"><i class="bi bi-brush"></i></button> -->
+        </div>
+    </div>
+    <div class="tool-container mb-1">
+        <button id="main-shape" class="tool-btn main-btn d-tools">
+            <i class="bi bi-square"></i>
+        </button>
+        <div class="tool-options tool-options__left">
+            <button class="tool-btn shape"><i class="bi bi-triangle"></i></button>
+            <button class="tool-btn shape"><i class="bi bi-circle"></i></button>
+            <button class="tool-btn shape"><i class="bi bi-square"></i></button>
+            <button class="tool-btn shape"><i class="bi bi-pentagon"></i></button>
+        </div>
+    </div>
+
+    <div class="tool-container">
+        <button id="line" class="tool-btn main-btn">
+            <i class="bi bi-border-width"></i>
+            <sub id="line-value"></sub>
+        </button>
+        <div class="tool-options tool-options__left"
+             style="padding: 14px 5px; border: 1px transparent">
+            <input id="line-width"
+                   type="range"
+                   min="1"
+                   max="20"
+                   style="width: 150px; cursor: pointer; font-size: 14px" />
+        </div>
+    </div>
+    <div class="tool-container">
+        <button id="eraser" class="tool-btn main-btn d-tools">
+            <i class="bi bi-eraser"></i>
+            <sub id="eraser-value"></sub>
+        </button>
+        <div class="tool-options tool-options__left"
+             style="padding: 14px 5px; border: 1px transparent">
+            <input id="eraser-width"
+                   type="range"
+                   min="1"
+                   max="20"
+                   style="width: 150px; cursor: pointer; font-size: 14px" />
+        </div>
+    </div>
+    <div class="tool-container">
+        <button id="main-color" class="tool-btn main-btn">
+            <i class="bi bi-circle-fill icon-black"></i>
+        </button>
+        <div class="tool-options tool-options__left">
+            <button class="tool-btn color">
+                <i class="bi bi-circle-fill icon-red"></i>
+            </button>
+            <button class="tool-btn color">
+                <i class="bi bi-circle-fill icon-green"></i>
+            </button>
+            <button class="tool-btn color">
+                <i class="bi bi-circle-fill icon-blue"></i>
+            </button>
+            <button class="tool-btn color">
+                <i class="bi bi-circle-fill icon-black"></i>
+            </button>
+        </div>
+    </div>
+    <div class="tool-container">
+        <button class="tool-btn" id="enableText">
+            <i class="bi bi-fonts"></i>
+        </button>
+    </div>
+    <div class="tool-container" id="enableImage">
+        <button class="tool-btn">
+            <i class="bi bi-image"></i>
+            <input type="file" id="imageInput" style="display: none">
+        </button>
+    </div>
+    <div class="tool-container">
+        <button class="tool-btn d-tools" id="selectionPointer"><i class="bi bi-cursor-fill"></i></button>
+    </div>
+</div>
+
+<!-- Toolbar section end  -->
+
+<!-- External section start  -->
+
+<div class="external">
+    <button class="round-btn" data-bs-toggle="modal" data-bs-target="#shareLinkModal"><i class="bi bi-share"></i></button>
+    <button class="round-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#sharedPeople" aria-controls="offcanvasScrolling">
+        <i class="bi bi-people"></i>
+        <span id="people-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            
+        </span>
+    </button>
+</div>
+
+
+<div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="sharedPeople" aria-labelledby="offcanvasScrollingLabel" style="width: 17rem">
+    <div class="offcanvas-header p-2">
+        <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Shared people</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <div id="shared-people" class="shared-people text-truncate">
+           
+        </div>
+    </div>
+</div>
+
+<!-- External section end  -->
+<!-- Drawing canvas section start  -->
+<div id="drawing-area" class="drawing-area drawing-area-left">
+    <canvas id="canvas"></canvas>
+</div>
+
+<!-- Modify object section  -->
+
+<div id="changeMenu">
+    <div class="dropdown">
+        <button class="action-dropdown" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-grip-horizontal"></i>
+        </button>
+        <ul class="object-change dropdown-menu p-1" aria-labelledby="dropdownMenuButton2">
+            <li>
+                <a class="dropdown-item" id="objectRemove">
+                    <i class="bi bi-trash3 me-1"></i>
+                    Delete
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item">
+                    <i class="bi bi-border-width me-1"></i>
+                    Line
+                    <input id="objectLineWidth" type="number" min="1" max="20" step="1" style="width: 42px; height: 17px;">
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item">
+                    <i class="bi bi-magic me-1"></i>
+                    Opacity
+                    <input id="objectOpacity" type="number" min="0" max="1" step="0.1" style="width: 42px; height: 17px;">
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item">
+                    <i class="bi bi-palette me-1"></i>
+                    Color
+                    <input id="objectColor" type="color" style="width: 42px; height: 17px;padding: 0px;">
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<!-- Export section start  -->
+
+<div class="modal fade" id="fileExportModal" aria-labelledby="exportFile" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="width: 25rem;">
+            <div class="modal-header bg-light py-1">
+                <h1 class="modal-title fs-5" id="exportFile">Export as</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" name="exportType" id="jpeg" value="jpeg">
+                    <label class="form-check-label" for="jpeg">
+                        JPEG
+                    </label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" name="exportType" id="png" value="png" checked>
+                    <label class="form-check-label" for="png">
+                        PNG
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-primary px-3" id="exportButton">Export</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+ <!--Share link section-->
+<div class="modal fade" id="shareLinkModal" tabindex="-1" aria-labelledby="shareLink" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light py-1">
+                <h1 class="modal-title fs-5" id="shareLink">Share board</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-2">
+                <div class="row g-2">
+                    <div class="col-8">
+                        <input id="sharedLink"  type="text" class="form-control py-2" value="@ViewBag.shareLink">
+                    </div>
+                    <div class="col-4">
+                        <button id="copyBtn" class="btn btn-primary py-2" onclick="copyToClipboard()"> <i class="bi bi-copy me-1"></i> Copy link</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Toast section-->
+<div class="position-fixed top-0 end-0 py-3 px-2" style="z-index: 9999;">
+    <div id="toast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" style="background:#E0FFFF;">
+        <div class="d-flex align-items-center justify-content-between mr-5">
+
+            <div id="toastBody" class="toast-body">
+                
+            </div>
+             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<div style="position: fixed; left: 10px; bottom: 10px;z-index: 999;">
+    <button id="undo" class="btn btn-secondary ms-2"><i class="bi bi-arrow-90deg-left"></i></button>
+    <button id="redo" class="btn btn-secondary ms-2"><i class="bi bi-arrow-90deg-right"></i></button>
+</div>
+
+
+
+
+
+<script>
+    function copyToClipboard() {
+        var input = document.getElementById("sharedLink");
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value).then(function () {
+            console.log('text copied');
+        }, function (err) {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+</script>
+@section Scripts {
+    <script src="~/js/signalr.js"></script>
+
+    <script src="~/js/board.js"></script>
+    <script src="~/js/fabric.js"></script>
+    <script src="~/js/drawing.js"></script>
+    <script src="~/js/undo-redo.js"></script>
+    <script src="~/js/fileexport.js"></script>
+    @* <script src="~/lib/uuidv4/build/lib/uuidv4.js"></script> *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            const { v4: uuidv4 } = uuid;
+
+            const sharedUser = @Model.IsShared.ToString().ToLower();
+            const boardId = '@Model.BoardId';
+            const userName = '@Model.FullName';
+
+            const toast = document.getElementById('toast');
+
+            const undoBtn = document.getElementById('undo');
+            const redoBtn = document.getElementById('redo');
+
+            
+
+
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/board")
+                .build();
+
+            async function startConnection() {
+                try {
+                    await connection.start();
+                    console.log("SignalR Connected.");
+                } catch (err) {
+                    console.error("Error starting connection: ", err);
+                    setTimeout(startConnection, 5000);
+                }
+            }
+            // Handle reconnecting
+            connection.onclose(async () => {
+                await startConnection();
+            });
+            // startConnection();
+
+            /*Sending request*/
+            async function joinBoard(boardId, userName) {
+                try {
+                    await connection.invoke("JoinBoard", boardId, userName);
+                    console.log(`${userName} joined board ${boardId}`);
+                } catch (err) {
+                    console.error("Error joining board: ", err);
+                }
+            }
+
+       
+
+            async function leaveBoard(boardId, userName) {
+                try {
+                    await connection.invoke("LeaveBoard", boardId, userName);
+                    console.log(`${userName} left board ${boardId}`);
+                } catch (err) {
+                    console.error("Error leaving board: ", err);
+                }
+            }
+
+
+            async function getUsersInGroup(boardId) {
+                try {
+                    await connection.invoke("UsersInGroup", boardId);
+                } catch (err) {
+                    console.error("Error getting users in group:", err.toString());
+                }
+            }
+
+            
+
+            async function undo(boardId) {
+                try {
+                    await connection.invoke("Undo", boardId);
+                }
+                catch (err) {
+                    console.log('error getting undo state', err.toString());
+                }
+            }
+
+             async function redo(boardId) {
+                try {
+                    await connection.invoke("Redo", boardId);
+                }
+                catch (err) {
+                    console.log('error getting redo state', err.toString());
+                }
+            }
+
+            async function sendObjectChange(canvasObj) {
+                try {
+                    await connection.invoke("AddOrUpdateObject", canvasObj);
+                    // console.log(`Object ${canvasObj.objectId} change sent to board ${canvasObj.boardId}`);
+                } catch (err) {
+                    console.error("Error sending object change: ", err);
+                }
+            }
+
+            async function deleteObject(boardId, objectId) {
+                try {
+                    await connection.invoke("DeleteObject", boardId, objectId);
+                    console.log(`Object ${objectId} deleted from board ${boardId}`);
+                } catch (err) {
+                    console.error("Error deleting object: ", err);
+                }
+            }
+
+            
+            /*Receive response*/
+
+            connection.on('userJoined', async (value) => {
+                // Show the toast message
+                let toaster = new bootstrap.Toast(document.getElementById('toast'));
+                document.getElementById('toastBody').innerHTML = `<strong>${value}</strong> joined the board`;
+                toaster.show();
+
+                try {
+                    
+                    const usersInGroup = await connection.invoke("UsersInGroup", boardId);
+                    console.log("Users in group:", usersInGroup);
+                    // You can perform additional actions with the usersInGroup data
+                } catch (err) {
+                    console.error("Error invoking UsersInGroup:", err.toString());
+                }
+            });
+
+            connection.on('userLeft', async (user) => {
+                console.log(user, 'left the board');
+
+                let toaster = new bootstrap.Toast(document.getElementById('toast'));
+                document.getElementById('toastBody').innerHTML = `<strong>${user}</strong> left the board`;
+                toaster.show();
+
+                try {
+                    // Invoke a method on the server to get users in the group
+                    const usersInGroup = await connection.invoke("UsersInGroup", boardId);
+                    console.log("Users in group:", usersInGroup);
+                    // You can perform additional actions with the usersInGroup data
+                } catch (err) {
+                    console.error("Error invoking UsersInGroup:", err.toString());
+                }
+            });
+
+
+
+            let isLoadingCanvas = false;
+
+
+            connection.on('ReceiveUndoRedoState', (canvasData) => {
+                console.log('undo redo state', canvasData);
+                var canvasObjects = canvasData.canvasObjects;
+                isLoadingCanvas = true;
+                canvas.clear();
+                canvasObjects.forEach(obj => {
+                    console.log('canvas -> ', obj);
+                    applyObjectChange(obj.objectId, obj.objectData);
+                });
+                isLoadingCanvas = false;
+            });
+
+            
+
+
+            connection.on('receiveUsersInGroup', (group) => {
+               
+                let peopleCount = document.getElementById('people-count');
+                peopleCount.textContent = group.length;
+
+                peopleList = document.getElementById('shared-people');
+                peopleList.innerHTML = '';
+
+                group.forEach(user => {
+                    let p = document.createElement('p');
+
+                    let i = document.createElement('i');
+                    i.className = 'bi bi-circle-fill';
+                    let s = document.createElement('span');
+                    s.textContent = user;
+
+                    p.appendChild(i);
+                    p.appendChild(s);
+
+                    peopleList.appendChild(p);
+                });
+            });
+
+            connection.on('receiveCanvasObject', (canvasObj) => {
+                console.log('receved canvas object');
+                console.log(canvasObj);
+                applyObjectChange(canvasObj.objectId, canvasObj.objectData);
+            });
+
+            connection.on('ReceiveDeletedCanvasObjectId', (objectId) => {
+                console.log('delete obj id ', objectId);
+                deleteCanvasObject(objectId);
+            });
+
+            connection.on('receiveSavedDrawing', (value) => {
+                console.log('reveice saved drawing');
+                console.log(JSON.parse(value));
+                isLoadingCanvas = true;
+                canvas.loadFromJSON(value, () => {
+                    canvas.renderAll();
+                    isLoadingCanvas = false;
+                });
+            });
+
+
+
+
+
+            canvas.on('object:added', (e) => {
+                const object = e.target;
+                if (!object.id) {
+                    object.id = uuidv4();
+                }
+                if (isLoadingCanvas) return;
+
+                const objectData = JSON.stringify(object.toObject(['id']));
+
+                const canvasObj = {
+                    objectId: object.id,
+                    objectData: objectData,
+                    boardId: boardId
+                };
+
+                sendObjectChange(canvasObj);
+            });
+
+            canvas.on('object:modified', (e) => {
+                const object = e.target;
+                if (isLoadingCanvas) return;
+
+                const objectData = JSON.stringify(object.toObject(['id']));
+                const canvasObj = {
+                    objectId: object.id,
+                    objectData: objectData,
+                    boardId: boardId
+                };
+
+                sendObjectChange(canvasObj);
+            });
+
+            canvas.on('object:removed', (e) => {
+                const object = e.target;
+                if (isLoadingCanvas) return;
+
+                deleteObject(boardId, object.id);
+            });
+
+            
+
+            function applyObjectChange(objectId, objectData) {
+                fabric.util.enlivenObjects([JSON.parse(objectData)], function (objects) {
+                    if (objects.length > 0) {
+                        console.log('apply -->', objects);
+                        const object = objects[0];
+                        isLoadingCanvas = true;
+                        const existingObject = canvas.getObjectById(objectId);
+                        if (existingObject) {
+                            canvas.remove(existingObject);
+                        }
+
+                        canvas.add(object);
+                        canvas.renderAll();
+                        isLoadingCanvas = false;
+                    }
+                });
+            }
+
+            function deleteCanvasObject(objectId) {
+                fabric.util.enlivenObjects(function (objectId) {
+                    isLoadingCanvas = true;
+                    const existingObject = canvas.getObjectById(objectId);
+                    if (existingObject) {
+                        canvas.remove(existingObject);
+                    }
+                    canvas.renderAll();
+                    isLoadingCanvas = false;
+                });
+            }
+
+            fabric.Canvas.prototype.getObjectById = function (id) {
+                return this.getObjects().find(obj => obj.id === id);
+            };
+
+            (async function initialize() {
+                await startConnection();
+                await joinBoard(boardId, userName);
+
+                try {
+                    const board = await connection.invoke("GetBoard", boardId);
+                    const canvasObjects = board.canvasObjects;
+                    console.log(board);
+                    console.log(canvasObjects);
+                    canvasObjects.forEach(obj => {
+                        applyObjectChange(obj.objectId, obj.objectData);
+                        // console.log(obj);
+                    });
+                } catch (err) {
+                    console.error('Error getting initial drawing:', err);
+                }
+
+                getUsersInGroup(boardId);
+            })();
+
+           
+
+            undoBtn.addEventListener('click', function () {
+                undo(boardId);
+            });
+            redoBtn.addEventListener('click', function () {
+                redo(boardId);
+            });
+
+        });
+
+
+    </script>
+}
+

@@ -1,0 +1,514 @@
+.tool-container {
+    position: relative;
+    width: 50px;
+}
+
+.tool-btn {
+    width: 50px;
+    height: 50px;
+    border: 0;
+    background-color: #fff;
+}
+
+    .tool-btn:hover {
+        border-radius: 5px;
+    }
+
+.tool-options {
+    position: absolute;
+    border: 1px solid rgba(128, 128, 128, 0.265);
+    border-radius: 5px;
+    display: none;
+}
+
+.show-tool {
+    display: flex;
+}
+
+
+.tool-options__left {
+    top: 0;
+    left: 50px;
+    border-left: 0;
+    flex-direction: row;
+}
+
+.tool-options__top {
+    left: 0;
+    top: 50px;
+    flex-direction: column;
+    border-top: 0;
+}
+
+.tool-options__bottom {
+    left: 0;
+    bottom: 50px;
+    flex-direction: column-reverse;
+    border-bottom: 0;
+}
+
+.tool-options__right {
+    top: 0;
+    right: 50px;
+    border-right: 0;
+    flex-direction: row-reverse;
+}
+
+.toolbar {
+    position: fixed;
+    display: flex;
+    background: #fff;
+    border: 1px solid #bbded6;
+    box-shadow: 0 0 3px #898b8b;
+    z-index: 999;
+}
+
+.toolbar__left {
+    top: 4.5rem;
+    left: 1rem;
+    flex-direction: column;
+    padding: 15px 3px;
+}
+
+.toolbar__right {
+    top: 4.5rem;
+    right: 1rem;
+    flex-direction: column;
+    padding: 15px 3px;
+}
+
+.toolbar__top {
+    top: 1rem;
+    left: calc(50% - 215px);
+    padding: 3px 15px;
+    flex-direction: row;
+}
+
+.toolbar__bottom {
+    bottom: 1rem;
+    left: calc(50% - 215px);
+    padding: 3px 15px;
+    flex-direction: row;
+}
+
+.tool-selected {
+    background-color: rgb(162, 218, 218);
+}
+
+.icon-black {
+    color: black;
+}
+
+.icon-red {
+    color: red;
+}
+
+.icon-green {
+    color: green;
+}
+
+.icon-blue {
+    color: blue;
+}
+
+#line-value, #eraser-value {
+    position: absolute; 
+    bottom: 10px; 
+    right: 5px;
+}
+
+
+@media screen and (max-width: 768px) {
+    .tool-container {
+        width: 40px;
+    }
+
+    .tool-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .toolbar__top {
+        top: 3rem;
+        padding: 2px 10px;
+        flex-direction: row;
+        left: calc(50% - 170px);
+    }
+
+    .toolbar__bottom {
+        bottom: 3.5rem;
+        padding: 2px 10px;
+        left: calc(50% - 170px);
+    }
+
+    .tool-options__left {
+        left: 40px;
+    }
+
+    .tool-options__top {
+        top: 40px;
+    }
+
+    .tool-options__bottom {
+        bottom: 40px;
+    }
+
+    .tool-options__right {
+        right: 40px;
+    }
+
+    #line-value, #eraser-value {
+        font-size:10px;
+        bottom: 6px;
+        right: 3px;
+    }
+
+}
+
+/* toolbar control section */
+
+.round-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 1px solid gray;
+    outline: 0;
+    color: black;
+    background: #bbded6;
+}
+
+.round-btn__small {
+    width: 28px;
+    height: 28px;
+}
+
+    .round-btn__small i {
+        font-size: 14px;
+    }
+
+/* Toolber position control */
+.toolbar-position-control {
+    position: fixed;
+    top: 4px;
+    left: 8rem;
+    z-index: 999;
+}
+
+
+/* External section  */
+.external {
+    position: fixed;
+    right: 0.8rem;
+    top: 0.6rem;
+    z-index: 999;
+}
+
+/* Menu  section  */
+#menu-toggler {
+    position: fixed;
+    left: 0.5rem;
+    top: 0.5rem;
+    z-index: 999;
+}
+
+.menu {
+    min-width: 13rem;
+    background-color: #f8f8fc;
+    box-shadow: 0 0 1px rgba(41, 42, 40, 0.251);
+    border-radius: 8px;
+}
+
+    .menu .dropdown-item {
+        padding: 6px 8px;
+        font-size: 13px;
+        color: #353539;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        font-weight: 400;
+    }
+
+        .menu .dropdown-item:hover {
+            background-color: rgba(193, 190, 228, 0.829);
+        }
+
+/* Shared people section  */
+.shared-people p {
+    font-size: 14px;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    cursor: default;
+}
+
+    .shared-people p i {
+        font-size: 14px;
+        color: rgb(158, 239, 35);
+        margin-right: 0.5rem;
+    }
+
+
+    .shared-people p:hover {
+        background-color: rgb(201, 220, 237);
+    }
+
+/* External - people list section  */
+
+.people-list {
+    position: fixed;
+    right: 0.5rem;
+    top: 5rem;
+    width: 15rem;
+    height: 80vh;
+    border: 1px solid rgba(121, 127, 125, 0.447);
+    border-radius: 5px;
+    box-shadow: 0 0 3px rgba(45, 38, 38, 0.374);
+    background: #fff;
+    transform: translateX(16rem);
+    transition: transform 0.3s;
+    overflow-y: auto;
+    z-index: 999;
+}
+
+    .people-list.show-people {
+        transform: translateX(0);
+    }
+
+    .people-list p {
+        font-size: 14px;
+        font-weight: 400;
+        color: #666161;
+        opacity: 0.8;
+    }
+
+
+/* Change / modify object section  */
+
+#changeMenu {
+    position: absolute;
+    display: none;
+}
+
+.object-change {
+    min-width: 125px;
+    background-color: #ffff;
+    box-shadow: 0 0 1px rgba(41, 42, 40, 0.251);
+    border-radius: 5px;
+}
+
+    .object-change .dropdown-item {
+        padding: 2px 4px;
+        font-size: 12px;
+        border-radius: 4px;
+        margin-bottom: 5px;
+        cursor: pointer;
+    }
+
+        .object-change .dropdown-item input {
+            position: absolute;
+            right: 5px;
+        }
+
+        .object-change .dropdown-item:hover {
+            background-color: rgb(167, 175, 200);
+        }
+
+.action-dropdown {
+    border: 0;
+    height: 28px;
+    width: 30px;
+    border-radius: 3px;
+    background-color: #ffff;
+    z-index: 777;
+}
+
+    .action-dropdown i {
+        font-size: 25px;
+    }
+
+    .action-dropdown .dropdown {
+        z-index: 888;
+    }
+
+
+/*Library section */
+.custom-table {
+    border-collapse: separate !important;
+    border-spacing: 0 20px;
+    width: 100%;
+}
+
+    .custom-table tbody tr {
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+        .custom-table tbody tr td {
+            padding: 0 8px;
+        }
+
+
+.board-item {
+    padding: 0.5rem;
+    vertical-align: middle;
+    cursor: pointer;
+}
+.thumbnail {
+    padding-left:0px !important;
+}
+
+.thumbnail img {
+    width: 10rem;
+    height: 8rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+}
+
+.board-title {
+    font-size: 1.2rem;
+    font-weight: 400;
+}
+
+.board-date p {
+    font-size: 1rem;
+    margin: 0;
+    padding: 0;
+    color: #4d4747;
+}
+
+.board-owner p {
+    font-size: 1.2rem;
+    margin-bottom: 0;
+}
+
+.board-owner span {
+    font-size: 14px;
+    font-weight: 300;
+}
+
+.dataTables_filter {
+    float: left !important;
+}
+
+    .dataTables_filter label {
+        display: flex;
+        align-items: center;
+    }
+
+.dataTables_length {
+    float: right !important;
+}
+
+.dataTables_filter input {
+    border: 1px solid #9794944a;
+    border-radius: 5px;
+    padding: 8px 5px !important;
+    width: 60vw;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+    .dataTables_filter input:focus {
+        border-color: #007bff7b;
+    }
+
+@media screen and (max-width: 768px) {
+    .custom-table tbody tr td {
+        padding: 0 5px;
+    }
+
+    .thumbnail {
+        width: 6rem;
+        height: 4rem;
+    }
+
+    .board-title {
+        font-size: 15px;
+    }
+
+    .board-date p {
+        font-size: 14px;
+    }
+
+    .board-owner p {
+        font-size: 15px;
+    }
+
+    .board-owner span {
+        font-size: 13px;
+    }
+
+    .dataTables_filter {
+        float: left !important;
+    }
+
+        .dataTables_filter input {
+            padding: 5px 3px !important;
+            width: 50vw;
+        }
+}
+
+
+/*My board section */
+
+.card-board {
+    width: 18rem;
+}
+
+    .card-board img {
+        width: 100%;
+        height: 14rem;
+    }
+
+    .card-board .card-body {
+        padding: 0.5rem;
+    }
+
+    .card-board .card-title {
+        font-size: 1rem;
+        font-weight: 400;
+        padding: 5px;
+        padding-bottom: 0;
+    }
+
+    .card-board .card-date {
+        font-size: 13px;
+        margin-bottom: 5px;
+        color: rgb(107, 102, 102);
+    }
+
+    .card-board .card-footer {
+        padding: 0;
+        background: none;
+    }
+
+        .card-board .card-footer .btn {
+            border-radius: 0;
+        }
+
+/*Delete modal */
+
+.modal-delete {
+    width: 16rem;
+}
+
+    .modal-delete .modal-img {
+        width: 8rem;
+        height: 8rem;
+    }
+
+
+    .modal-delete .modal-title {
+        font-size: 1.3rem;
+        font-weight: 500;
+        padding: 5px;
+    }
+
+    .modal-delete .modal-footer {
+        padding: 0;
+        background: none;
+    }
+
+        .modal-delete .modal-footer .btn {
+            border-radius: 0;
+            margin: 0;
+        }
