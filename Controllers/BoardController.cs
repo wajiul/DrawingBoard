@@ -52,6 +52,7 @@ namespace DrawingBoard.Controllers
 
                 user.Boards.Add(board);
 
+
                 var newUser = await _userRepository.AddUserAsync(user);
                 await _userRepository.SaveAsync();
 
