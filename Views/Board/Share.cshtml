@@ -4,12 +4,11 @@
 
     <form class="mt-5" method="post" asp-action="Share" asp-controller="Board">
         <div class="col-md-5 col-12 ms-auto me-auto">
-            <input asp-for="BoardId" value="@Model.BoardId" hidden />
-            <input asp-for="IsShared" value="@Model.IsShared" hidden/> 
+            <input asp-for="BoardId" value="@Model.BoardId" hidden /> 
             <div class="form-floating mb-2">
-                <input asp-for="FullName" class="form-control" placeholder="Owajeul">
-                <label asp-for="FullName"></label>
-                <span asp-validation-for="FullName" class="text-danger"></span>
+                <input asp-for="UserName" class="form-control" placeholder="Owajeul">
+                <label asp-for="UserName"></label>
+                <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
             <button class="btn btn-primary py-3 w-100">Submit</button>
         </div>

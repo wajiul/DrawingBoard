@@ -512,3 +512,44 @@
             border-radius: 0;
             margin: 0;
         }
+
+
+
+/*Myboard section */
+.board-item img {
+    transition: .5s;
+    width:20rem;
+    height:15rem;
+}
+
+.board-item:hover img {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+.board-item .board-overlay {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 0;
+    height: 0;
+    bottom: 0;
+    left: 50%;
+    background: rgba(53, 53, 53, .7);
+    transition: .5s;
+}
+
+.board-item:hover .board-overlay {
+    width: 100%;
+    height: 100%;
+    left: 0;
+}
+
+.board-item .board-overlay .btn {
+    opacity: 0;
+}
+
+.board-item:hover .board-overlay .btn {
+    opacity: 1;
+}

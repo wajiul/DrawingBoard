@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DrawingBoard.Models;
+using Microsoft.EntityFrameworkCore;
 using SignalRSample.Data;
 using SignalRSample.Models;
 
@@ -44,6 +45,47 @@ namespace SignalRSample.Repositories
             return canvas;
         }
 
+        public async Task<BoardUser?> GetBoardWithUserAsync(string boardId)
+        {
+            return await _context.Boards
+                .Where(b => b.BoardId == new Guid(boardId))
+                .Select(b => new BoardUser
+                {
+                    BoardId = b.BoardId.ToString(),
+                    BoardTitle = b.Title,
+                    UserId = b.UserId.ToString(),
+                    UserName = b.User.FullName,
+
+                }).FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<BoardModel>> GetBoardsDetailsWithoutCanvasAsync(Guid userId)
+        {
+           return await _context.Boards
+                .Where(b => b.UserId == userId)
+                .Select(b => new BoardModel
+                {
+                    BoardId = b.BoardId.ToString(),
+                    Title= b.Title,
+                    UserId = b.UserId.ToString(),
+                    Date = b.Date
+                }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<BoardWithAuthorModel>> GetAllUsersBoardDetailsWithoutCanvasAsync()
+        {
+            return await _context.Boards
+                .Select(b => new BoardWithAuthorModel
+                {
+                    BoardId = b.BoardId.ToString(),
+                    Title = b.Title,
+                    UserId = b.UserId.ToString(),
+                    Date = b.Date,
+                    Author = b.User.FullName,
+                    Email = b.User.Email
+                }).ToListAsync();
+        }
+
         public async Task<IEnumerable<User>> GetAllUsersBoardsAsync()
         {
             return await _context.Users
@@ -60,6 +102,31 @@ namespace SignalRSample.Repositories
                 .FirstOrDefaultAsync(u => u.UserId == userId);
             return userBoard;
         }
+
+        public async Task<IEnumerable<BoardCanvasModel>> GetAllBoardCanvasOfUserAsync(Guid userId)
+        {
+           return await _context.Boards
+                .Where(b => b.UserId == userId)
+                .Select(b => new BoardCanvasModel
+                {
+                    BoardId= b.BoardId.ToString(),
+                    CanvasObjects = b.CanvasObjects
+
+                }).ToListAsync();
+        }
+
+        public async Task<IEnumerable<BoardCanvasModel>> GetBoardCanvasOfAllUserAsync()
+        {
+            return await _context.Boards
+
+                 .Select(b => new BoardCanvasModel
+                 {
+                     BoardId = b.BoardId.ToString(),
+                     CanvasObjects = b.CanvasObjects
+
+                 }).ToListAsync();
+        }
+
 
         public async Task<User> GetUserBoardAsync(Guid userId)
         {

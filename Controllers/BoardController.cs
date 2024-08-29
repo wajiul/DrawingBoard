@@ -19,11 +19,19 @@ namespace DrawingBoard.Controllers
         }
 
 
-        public IActionResult Display(BoardUser user)
+        public async Task<IActionResult> Display(string boardId, string? userId = null)
         {
-            var shareLink = $"https://localhost:7041/board/share/{user.BoardId}";
-            ViewBag.shareLink = shareLink;
-            return View(user);
+            if(string.IsNullOrEmpty(boardId))
+            {
+                return NotFound();
+            } 
+            var boardUser = await _boardRepository.GetBoardWithUserAsync(boardId);
+
+            var shareLink = $"https://localhost:7041/board/share/{boardId}";
+            ViewBag.ShareLink = shareLink;
+            ViewBag.UserId = userId;
+
+            return View(boardUser);
         }
 
         public IActionResult Create()
@@ -57,14 +65,8 @@ namespace DrawingBoard.Controllers
                 await _userRepository.SaveAsync();
 
                 var newBoard = newUser.Boards.Take(1).FirstOrDefault();
-                var boardUser = new BoardUser
-                {
-                    BoardId = newBoard.BoardId,
-                    UserId = newUser.UserId,
-                    FullName = user.FullName,
-                    IsShared = false
-                };
-                return RedirectToAction("Display", boardUser);
+
+                return RedirectToAction("Display", newBoard.BoardId.ToString(), newUser.UserId.ToString());
             }
 
             return RedirectToAction("MyBoard", new { userId =  existing.UserId.ToString() });
@@ -73,11 +75,12 @@ namespace DrawingBoard.Controllers
 
         public async Task<IActionResult> MyBoard(string userId)
         {
+            var boards = await _boardRepository.GetBoardsDetailsWithoutCanvasAsync(new Guid(userId));
             var user = await _userRepository.GetUserAsync(new Guid(userId));
-            return View(user); 
+            ViewData["UserId"] = userId;
+            ViewData["UserName"] = user.FullName;
+            return View(boards); 
         }
-
-
 
         [HttpGet]
         public IActionResult Share(string Id)
@@ -85,8 +88,7 @@ namespace DrawingBoard.Controllers
 
             var boardUser = new BoardUser
             {
-                BoardId = new Guid(Id),
-                IsShared = true
+                BoardId = Id
             };
             return View(boardUser);
         }
@@ -97,13 +99,21 @@ namespace DrawingBoard.Controllers
             if (!ModelState.IsValid)
                 return View(user);
 
-            return RedirectToAction("Display", user);
+            return RedirectToAction("Display", user.BoardId);
         }
 
 
-        public IActionResult Library()
+        public async Task<IActionResult> Library(string userId)
         {
-            return View();
+            if(string.IsNullOrEmpty(userId)) 
+            {
+                return NotFound();
+            }
+            var boards = await _boardRepository.GetAllUsersBoardDetailsWithoutCanvasAsync();
+            var user = await _userRepository.GetUserAsync(new Guid(userId));
+            ViewData["UserId"] = userId;
+            ViewData["UserName"] = user.FullName;
+            return View(boards);
         }
 
 
@@ -121,27 +131,21 @@ namespace DrawingBoard.Controllers
             await _boardRepository.AddAsync(board);
             await _boardRepository.SaveAsync();
 
-            var boardUser = new BoardUser
-            {
-                BoardId = board.BoardId,
-                FullName = user.FullName,
-                UserId = user.UserId,
-                IsShared = false
-            };
 
-            return RedirectToAction("Display", boardUser);
+            return RedirectToAction("Display", board.BoardId.ToString(), board.UserId.ToString());
         }
         
-        public async Task<IActionResult> GetAllUsersBoards()
+        public async Task<IActionResult> GetBoardCanvas()
         {
-            var boars = await _boardRepository.GetAllUsersBoardsAsync();
-            return Ok(boars);   
+            var allCanvas = await _boardRepository.GetBoardCanvasOfAllUserAsync();
+            return Ok(allCanvas);   
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUserAllBoards(string userId)
         {
-            var boards = await _boardRepository.GetUserBoardsAsync(new Guid(userId)); 
+            //var boards = await _boardRepository.GetUserBoardsAsync(new Guid(userId)); 
+            var boards = await _boardRepository.GetAllBoardCanvasOfUserAsync(new Guid(userId));
             return Ok(boards);
         }
 

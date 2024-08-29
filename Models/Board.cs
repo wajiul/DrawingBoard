@@ -12,15 +12,11 @@ namespace SignalRSample.Models
         [Required]
         public string Title { get; set; } = string.Empty;
 
-        public ICollection<CanvasObject> CanvasObjects { get; set; }
+        public ICollection<CanvasObject> CanvasObjects { get; set; } = new List<CanvasObject>();
 
         public DateTime Date { get; set; }
         public Guid UserId { get; set; }
-
-        public Board()
-        {
-             CanvasObjects = new List<CanvasObject>();
-        }
+        public User User { get; set; }
 
     }
 }

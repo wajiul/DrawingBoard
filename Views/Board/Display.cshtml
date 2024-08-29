@@ -1,6 +1,11 @@
 ﻿
 @model BoardUser
 
+@{
+    string shareLink = ViewBag.ShareLink;
+    string userId = ViewBag.UserId;
+    bool isShared = string.IsNullOrEmpty(userId);
+}
 <div class="dropdown">
     <button class="round-btn"
             type="button"
@@ -11,7 +16,7 @@
     </button>
     <ul class="menu dropdown-menu mt-1 p-2 w-md-100"
         aria-labelledby="menu-toggler">
-        @if(Model.IsShared == false)
+        @if(isShared == false)
         {
             
             <li>
@@ -337,18 +342,14 @@
 
             const { v4: uuidv4 } = uuid;
 
-            const sharedUser = @Model.IsShared.ToString().ToLower();
+            const sharedUser = @isShared.ToString().ToLower();
             const boardId = '@Model.BoardId';
-            const userName = '@Model.FullName';
+            const userName = '@Model.UserName';
 
             const toast = document.getElementById('toast');
 
             const undoBtn = document.getElementById('undo');
             const redoBtn = document.getElementById('redo');
-
-            
-
-
 
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/hubs/board")

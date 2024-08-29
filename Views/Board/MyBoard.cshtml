@@ -1,80 +1,53 @@
-﻿@model User
+﻿@model IEnumerable<BoardModel>
 
+@{
+    string userId = (string)ViewData["UserId"];
+}
 <div style="display:none;">
-
     <canvas id="canvas"></canvas>
 </div>
 
+<partial name="_Navbar"/>
+
 <div class="container">
-    <h1 class="text-center">My Board</h1>
+    <h1 class="text-center text-primary">My Board</h1>
 
-    <a asp-action="AddNewBoard" asp-route-userId="@Model.UserId" class="btn btn-primary mb-3">Create New</a>
+    <a asp-action="AddNewBoard" asp-route-userId="@userId" class="btn btn-primary mb-3">Create New</a>
 
-    <div id="myBoard" class="row g-3 justify-content-center">
-        
-    </div>
-</div>
-
-<!--Confirm Delete Modal-->
-
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="false">
-    <div class="modal-dialog modal-dialog-centered modal-delete">
-        <div class="modal-content">
-            <div class="modal-body text-center">
-                <h5 class="modal-title text-center" id="exampleModalLabel">Are you sure ?</h5>
-                <img class="modal-img" src="~/images/icons8-delete-144.png">
-            </div>
-            <div class="modal-footer d-flex">
-                <a type="button" class="btn btn-primary py-2 w-50" data-bs-dismiss="modal">Cancel</a>
-                <a type="button" id="confirmDeleteBtn" class="btn btn-danger py-2 w-50">Confirm</a>
-            </div>
+        <div class="row g-4 justify-content-center align-items-center">
+            @foreach(var board in Model)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <a  
+                        asp-action="Display" asp-route-boardId="@board.BoardId" asp-route-userId="@board.UserId"
+                        class="text-decoration-none">
+                        <div class="card shadow board-item overflow-hidden p-0">
+                            <img id="@board.BoardId" src="~/images/icons8-delete-144.png" class="card-img-top">
+                            <div class="card-body">
+                                
+                            </div>
+                            <div class="card-footer bg-white px-0 mx-0 text-center position-relative">
+                                <h5 class="card-title text-black text-truncate">@board.Title</h5>
+                                <span class="text-secondary">@board.Date</span>
+                                <div class="board-overlay">
+                                    <a asp-action="Display" asp-route-boardId="@board.BoardId" asp-route-userId="@board.UserId"
+                                        class="btn btn-square btn-outline-light mx-1">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-boardId="@board.BoardId" asp-route-userId="@board.UserId"
+                                        class="btn btn-square btn-outline-danger mx-1">
+                                        <i class="bi bi-trash3"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
         </div>
-    </div>
+
 </div>
 
-<script>
-    let boardIdToDelete = null;
-
-    // Function to show the modal and store the boardId
-    function confirmDelete(boardId) {
-        boardIdToDelete = boardId;
-        $('#deleteModal').modal('show');
-    }
-
-    // Add event listener for the delete confirmation button
-    document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
-        if (boardIdToDelete) {
-            // API endpoint to delete the board
-            const deleteBoardUrl = `/board/deleteBoard?boardId=${boardIdToDelete}`;
-
-            fetch(deleteBoardUrl, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Handle successful response
-                console.log('Board deleted:', data);
-
-                // Close the modal
-                $('#deleteModal').modal('hide');
-
-                // Optionally, remove the card from the UI
-                document.querySelector(`[data-board-id="${boardIdToDelete}"]`).closest('.col-auto').remove();
-
-                // Reset boardIdToDelete
-                boardIdToDelete = null;
-            })
-            .catch(error => {
-                console.error('Error deleting board:', error);
-                // Handle the error
-            });
-        }
-    });
-
-</script>
 
 @section Scripts {
     <script src="~/js/fabric.js"></script>
@@ -91,7 +64,7 @@
 
             const myBoard = document.getElementById('myBoard');
            
-            const userId = '@Model.UserId';
+            const userId = '@userId';
             let userData = null;
 
             async function getCanvasThumbnail(canvasData) {
@@ -101,58 +74,13 @@
                     format: 'png',
                     quality: 1.0
                 });
-
-                // console.log(dataURL);
                 return dataURL;
             }
-
-            async function populateUserBoards(user) {
-                // console.log('user ', user);
-                userData = user;
-                myBoard.innerHTML = '';
-
-                for(const board of user.boards) {
-                    // console.log(board);
-                    const imgSrc = await getCanvasThumbnail(board.canvasObjects);
-
-                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                    const date = new Date(board.date);
-                    const formattedDate = date.toLocaleDateString('en-US', options);
-
-                    myBoard.innerHTML += getCard(imgSrc, board.title, formattedDate, board.boardId, user.fullName, user.userId);
-                }
-            }
-
-
-
-            function getCard(imageSrc, title, date, boardId, name, userId) {
-                const boardEditLink = `/board/display?boardId=${boardId}&fullName=${name}&isShared=false&userId=${userId}`;
-                const boardDeleteLink = `/board/delete?id=${boardId}`
-                return `
-                        
-                            <div class="col-auto">
-                                <div class="card card-board">
-                                    <img src="${imageSrc}" class="card-img-top">
-                                    <div class="card-body">
-                                        <h5 class="card-title text-center text-truncate">${title}</h5>
-                                        <p class="card-date text-center">${date}</p>
-                                    </div>
-                                    <div class="card-footer d-flex">
-                                        <a href=${boardEditLink} class="btn  btn-primary w-50">Edit</a>
-                                         <button data-board-id="${boardId}" onclick="confirmDelete('${boardId}')" class="btn btn-danger w-50 delete-board-btn">Delete</button>
-                                    </div>
-                                </div>
-                            </div>
-                        
-                    `;
-            }
-
 
             function applyObjectChange(objectId, objectData) {
                 fabric.util.enlivenObjects([JSON.parse(objectData)], function (objects) {
                     if (objects.length > 0) {
                         const object = objects[0];
-                        // console.log(object);
                         canvas.add(object);
                         canvas.renderAll();
                     }
@@ -160,38 +88,35 @@
             }
 
             async function loadCanvasFromDb(canvasObjects) {
-                // console.log(canvasObjects);
                 canvasObjects.forEach(obj => {
-                    // console.log(obj);
                     applyObjectChange(obj.objectId, obj.objectData);
                 });
 
-                // console.log(canvas.toJSON());
             }
 
-           
-            function getBoardData() {
-                let url = `GetUserAllBoards?userId=${userId}`;
-                // console.log(url);
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => populateUserBoards(data));
+            async function showBoardImages(boards) {
+                for (let board of boards) {
+                    console.log('b', board);
+                    const imgSrc = await getCanvasThumbnail(board.canvasObjects);
+                    console.log(board.boardId);
+                    const ch = $(`#${board.boardId}`);
+                    console.log('ch', ch);
+                    $(`#${board.boardId}`).attr('src', imgSrc);
+                }
+            } 
+
+            function getAllBoardCanvas() {
+                $.ajax({
+                    url: `GetUserAllBoards?userId=${userId}`,
+                    method: 'GET',
+                    contentType: 'application/json',
+                    success: function(response) {
+                        showBoardImages(response);
+                    }
+                });
             }
-
-
-            // document.querySelectorAll('.delete-board-btn').forEach(button => {
-            //     console.log(button);
-            //     button.addEventListener('click', function () {
-            //         currentBoardId = this.getAttribute('data-board-id');
-            //         $('#deleteModal').modal('show');
-            //     });
-            // });
-
         
-            
-            getBoardData();
-
-
+            getAllBoardCanvas();
         });
 
     </script>
