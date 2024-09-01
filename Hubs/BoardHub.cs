@@ -205,6 +205,14 @@ namespace SignalRSample.Hubs
             await Clients.Group(groupId).SendAsync("ReceiveUndoRedoState", deserializedState);
         }
 
+
+        public async Task UpdateTitle(string boardId, string title)
+        {
+            var groupId = boardId.ToString();
+            await _boardRepository.UpdateBoardTitleAsync(new Guid(boardId), title);
+            await _boardRepository.SaveAsync();
+            await Clients.Group(groupId).SendAsync("ReceiveTitle", title);
+        }
     }
 
 }

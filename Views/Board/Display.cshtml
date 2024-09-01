@@ -6,6 +6,13 @@
     string userId = ViewBag.UserId;
     bool isShared = string.IsNullOrEmpty(userId);
 }
+
+<div class="title-container shadow">
+    <span class="mx-2 single-line-text text-truncate" id="board-title" contenteditable="true" spellcheck="false">
+        @Model.BoardTitle
+    </span>
+</div>
+
 <div class="dropdown">
     <button class="round-btn"
             type="button"
@@ -62,22 +69,50 @@
 
 <!-- Menu section end  -->
 <!-- Toolbar section start  -->
-<div class="toolbar-position-control">
-    <button class="round-btn round-btn__small position-control"
-            id="left"
-            value="left">
+
+<div class="dropdown toolbar-position-control p-2">
+    <button 
+        class="round-btn round-btn__small dropdown-toggle" 
+        id="left"
+        value="left" 
+        data-bs-toggle="dropdown" aria-expanded="false"
+    >
         <i class="bi bi-align-start"></i>
     </button>
-    <button class="round-btn round-btn__small position-control" id="top">
-        <i class="bi bi-align-top"></i>
-    </button>
-    <button class="round-btn round-btn__small position-control" id="right">
-        <i class="bi bi-align-end"></i>
-    </button>
-    <button class="round-btn round-btn__small position-control" id="bottom">
-        <i class="bi bi-align-bottom"></i>
-    </button>
+
+    <ul class="dropdown-menu custom-dropdown-width px-1">
+        <li class="mb-1">
+            <button class="round-btn round-btn__small position-control" id="top">
+                <i class="bi bi-align-top"></i>
+            </button>
+        </li>
+        <li class="mb-1">
+            <button class="round-btn round-btn__small position-control" id="top">
+                <i class="bi bi-align-top"></i>
+            </button>
+        </li>
+    </ul>
+
 </div>
+
+
+
+ @* <div class="toolbar-position-control">
+     <button class="round-btn round-btn__small position-control"
+             id="left"
+             value="left">
+         <i class="bi bi-align-start"></i>
+     </button>
+     <button class="round-btn round-btn__small position-control" id="top">
+         <i class="bi bi-align-top"></i>
+     </button>
+     <button class="round-btn round-btn__small position-control" id="right">
+         <i class="bi bi-align-end"></i>
+     </button>
+     <button class="round-btn round-btn__small position-control" id="bottom">
+         <i class="bi bi-align-bottom"></i>
+     </button>
+ </div> *@
 
 <div id="toolbar" class="toolbar toolbar__left">
     <div class="tool-container mb-1">
@@ -181,9 +216,9 @@
 
 
 <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="sharedPeople" aria-labelledby="offcanvasScrollingLabel" style="width: 17rem">
-    <div class="offcanvas-header p-2">
-        <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Shared people</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <div class="offcanvas-header p-2 bg-primary text-white">
+        <h5 class="offcanvas-titlepx-3" id="offcanvasScrollingLabel">Connected people</h5>
+        <button type="button" class="btn-close bg-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
 
     <div class="offcanvas-body">
@@ -305,8 +340,8 @@
 </div>
 
 <div style="position: fixed; left: 10px; bottom: 10px;z-index: 999;">
-    <button id="undo" class="btn btn-secondary ms-2"><i class="bi bi-arrow-90deg-left"></i></button>
-    <button id="redo" class="btn btn-secondary ms-2"><i class="bi bi-arrow-90deg-right"></i></button>
+    <button id="undo" class="btn btn-sm btn-light px-3 ms-2"><i class="bi bi-arrow-90deg-left"></i></button>
+    <button id="redo" class="btn btn-sm btn-light px-3 ms-1"><i class="bi bi-arrow-90deg-right"></i></button>
 </div>
 
 
@@ -334,7 +369,6 @@
     <script src="~/js/drawing.js"></script>
     <script src="~/js/undo-redo.js"></script>
     <script src="~/js/fileexport.js"></script>
-    @* <script src="~/lib/uuidv4/build/lib/uuidv4.js"></script> *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
 
     <script>
@@ -420,6 +454,16 @@
                 }
             }
 
+            async function updateTitle(boardId, title) {
+                try {
+                    await connection.invoke("UpdateTitle", boardId, title);
+                }
+                catch (err) {
+                    console.log('error updating title', err.toString());
+                }
+            }
+
+
             async function sendObjectChange(canvasObj) {
                 try {
                     await connection.invoke("AddOrUpdateObject", canvasObj);
@@ -497,7 +541,12 @@
             connection.on('receiveUsersInGroup', (group) => {
                
                 let peopleCount = document.getElementById('people-count');
-                peopleCount.textContent = group.length;
+                if(peopleCount > 1) {
+                    peopleCount.textContent = group.length;
+                }
+                else {
+                    $('#people-count').hide();
+                }
 
                 peopleList = document.getElementById('shared-people');
                 peopleList.innerHTML = '';
@@ -539,7 +588,10 @@
             });
 
 
-
+            connection.on('ReceiveTitle', (title) => {
+                console.log('received title > ', title);
+                $boardTitle.text(title);
+            });
 
 
             canvas.on('object:added', (e) => {
@@ -586,7 +638,7 @@
             function applyObjectChange(objectId, objectData) {
                 fabric.util.enlivenObjects([JSON.parse(objectData)], function (objects) {
                     if (objects.length > 0) {
-                        console.log('apply -->', objects);
+                        // console.log('apply -->', objects);
                         const object = objects[0];
                         isLoadingCanvas = true;
                         const existingObject = canvas.getObjectById(objectId);
@@ -645,6 +697,34 @@
             redoBtn.addEventListener('click', function () {
                 redo(boardId);
             });
+
+
+
+
+           
+            const $boardTitle = $('#board-title');
+            let titleUpdated = true; 
+
+            $boardTitle.on('click', function () {
+                $boardTitle.removeClass('text-truncate');
+                titleUpdated = false; 
+            });
+
+            
+            $(document).on('click', function (event) {
+                if (!$boardTitle.is(event.target) && !$boardTitle.has(event.target).length) {
+                    $boardTitle.addClass('text-truncate');
+                    if (!titleUpdated) {
+                        const title = $boardTitle.text();
+                        if(title.length > 0) {
+                            updateTitle(boardId, title);
+                        }
+                        titleUpdated = true;
+                    }
+                }
+            });
+
+
 
         });
 

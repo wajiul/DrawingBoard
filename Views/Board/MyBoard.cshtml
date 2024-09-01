@@ -28,7 +28,7 @@
                             </div>
                             <div class="card-footer bg-white px-0 mx-0 text-center position-relative">
                                 <h5 class="card-title text-black text-truncate">@board.Title</h5>
-                                <span class="text-secondary">@board.Date</span>
+                                <span class="text-secondary">@board.Date.ToString("dd MMM, yyyy")</span>
                                 <div class="board-overlay">
                                     <a asp-action="Display" asp-route-boardId="@board.BoardId" asp-route-userId="@board.UserId"
                                         class="btn btn-square btn-outline-light mx-1">

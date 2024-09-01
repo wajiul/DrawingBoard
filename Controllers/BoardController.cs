@@ -156,5 +156,17 @@ namespace DrawingBoard.Controllers
             return Ok(new { id = boardId});
         }
 
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateBoardTitle(string boardId, string title)
+            {
+            if(string.IsNullOrEmpty(title))
+            {
+                return BadRequest();
+            }
+            await _boardRepository.UpdateBoardTitleAsync(new Guid(boardId), title);
+            await _boardRepository.SaveAsync();
+            return Ok(title);
+        }
     }
 }

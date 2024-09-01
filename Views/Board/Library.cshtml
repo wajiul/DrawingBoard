@@ -30,7 +30,9 @@
                         <img id="@board.BoardId" src=""/>
                     </td>
                     <td class="board-title">
-                        @board.Title
+                        <a asp-action="Display" asp-route-boardId="@board.BoardId">
+                            @board.Title
+                        </a>
                     </td>
                     <td class="board-owner">
                         <p>@board.Author</p> 

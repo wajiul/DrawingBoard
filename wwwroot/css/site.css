@@ -1,3 +1,8 @@
+
+.dropdown-menu.custom-dropdown-width {
+    min-width: 30px !important;
+}
+
 .tool-container {
     position: relative;
     width: 50px;
@@ -165,6 +170,42 @@
 
 }
 
+/*board title */
+.title-container {
+    position: fixed;
+    top: 0;
+    left: 3rem;
+    width: auto;
+    max-width: 20rem;
+    height: 25px;
+    background:#fff;
+    border-radius: 3px;
+    z-index:99999;
+}
+
+
+.title-container #board-title {
+    font-size: 14px;
+    font-weight: 300;
+    border: 0;
+    border-radius: 2px;
+}
+
+.title-container #board-title:hover {
+    border:1px solid black;
+}
+
+.single-line-text {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 300px;
+    transition: max-width 0.3s;
+}
+
+
+
+
 /* toolbar control section */
 
 .round-btn {
@@ -189,8 +230,8 @@
 /* Toolber position control */
 .toolbar-position-control {
     position: fixed;
-    top: 4px;
-    left: 8rem;
+    top: 0.5rem;
+    right:10rem;
     z-index: 999;
 }
 
@@ -207,7 +248,7 @@
 #menu-toggler {
     position: fixed;
     left: 0.5rem;
-    top: 0.5rem;
+    top: 1rem;
     z-index: 999;
 }
 
