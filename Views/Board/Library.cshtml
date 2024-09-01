@@ -9,7 +9,7 @@
 
 <partial name="_Navbar" />
 
-<div class="container">
+<div class="container mb-5">
 
     <h1 class="text-center text-primary">Library</h1>
 
@@ -30,7 +30,7 @@
                         <img id="@board.BoardId" src=""/>
                     </td>
                     <td class="board-title">
-                        <a asp-action="Display" asp-route-boardId="@board.BoardId">
+                        <a asp-action="Display" asp-route-boardId="@board.BoardId" asp-route-userId="@userId">
                             @board.Title
                         </a>
                     </td>
@@ -85,6 +85,7 @@
             }
 
             async function loadCanvasFromDb(canvasObjects) {
+                canvas.clear();
                 canvasObjects.forEach(obj => {
                     applyObjectChange(obj.objectId, obj.objectData);
                 });
@@ -93,18 +94,15 @@
 
             async function showBoardImages(boards) {
                 for (let board of boards) {
-                    console.log('b', board);
                     const imgSrc = await getCanvasThumbnail(board.canvasObjects);
-                    console.log(board.boardId);
                     const ch = $(`#${board.boardId}`);
-                    console.log('ch', ch);
                     $(`#${board.boardId}`).attr('src', imgSrc);
                 }
             }
 
             function getAllBoardCanvas() {
                 $.ajax({
-                    url: `GetBoardCanvas`,
+                    url: `GetAllBoardCanvas`,
                     method: 'GET',
                     contentType: 'application/json',
                     success: function (response) {

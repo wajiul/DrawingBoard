@@ -12,25 +12,28 @@ namespace DrawingBoard.Controllers
     {
         private readonly BoardRepository _boardRepository;
         private readonly UserRepository _userRepository;
-        public BoardController(BoardRepository boardRepository, UserRepository userRepository)
+        private readonly IConfiguration _configuration;
+
+        public BoardController(BoardRepository boardRepository, UserRepository userRepository, IConfiguration configuration)
         {
             _boardRepository = boardRepository;
             _userRepository = userRepository;
+            _configuration = configuration;
         }
 
 
-        public async Task<IActionResult> Display(string boardId, string? userId = null)
+        public async Task<IActionResult> Display(string boardId, string? userId = null, string? userName = null)
         {
             if(string.IsNullOrEmpty(boardId))
             {
                 return NotFound();
             } 
             var boardUser = await _boardRepository.GetBoardWithUserAsync(boardId);
-
-            var shareLink = $"https://localhost:7041/board/share/{boardId}";
+            var rootLink = _configuration["SiteUrl"];
+            var shareLink = $"{rootLink}/board/share/{boardId}";
             ViewBag.ShareLink = shareLink;
             ViewBag.UserId = userId;
-
+            ViewBag.UserName = userName;
             return View(boardUser);
         }
 
@@ -55,7 +58,7 @@ namespace DrawingBoard.Controllers
                 var board = new Board
                 {
                     Title = "Untitled",
-                    Date = DateTime.Now,
+                    Date = DateTime.UtcNow
                 };
 
                 user.Boards.Add(board);
@@ -66,7 +69,13 @@ namespace DrawingBoard.Controllers
 
                 var newBoard = newUser.Boards.Take(1).FirstOrDefault();
 
-                return RedirectToAction("Display", newBoard.BoardId.ToString(), newUser.UserId.ToString());
+                return RedirectToAction("Display", new { boardId = newBoard.BoardId.ToString(), userId = newUser.UserId.ToString() });
+            }
+
+            else
+            {
+                await _userRepository.UpdateNameAsync(existing.UserId, user.FullName);
+                await _userRepository.SaveAsync();
             }
 
             return RedirectToAction("MyBoard", new { userId =  existing.UserId.ToString() });
@@ -122,7 +131,7 @@ namespace DrawingBoard.Controllers
             if (!ModelState.IsValid)
                 return View(user);
 
-            return RedirectToAction("Display", user.BoardId);
+            return RedirectToAction("Display", new {boardId = user.BoardId, userName = user.UserName});
         }
 
 
@@ -140,25 +149,26 @@ namespace DrawingBoard.Controllers
         }
 
 
-        public async Task<IActionResult> AddNewBoard(Guid userId)
+        public async Task<IActionResult> NewBoard(string userId)
         {
-            var user = await _userRepository.GetUserAsync(userId);
+            var user = await _userRepository.GetUserAsync(new Guid(userId));
 
             var board = new Board
             {
-                UserId = userId,
+                UserId = new Guid(userId),
                 Title = "Untitled",
-                Date = DateTime.Now
+                Date = DateTime.UtcNow
             };
 
             await _boardRepository.AddAsync(board);
             await _boardRepository.SaveAsync();
 
 
-            return RedirectToAction("Display", board.BoardId.ToString(), board.UserId.ToString());
+            return RedirectToAction("Display", new { boardId = board.BoardId.ToString(), userId = board.UserId.ToString() });
         }
-        
-        public async Task<IActionResult> GetBoardCanvas()
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllBoardCanvas()
         {
             var allCanvas = await _boardRepository.GetBoardCanvasOfAllUserAsync();
             return Ok(allCanvas);   

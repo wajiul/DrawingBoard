@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SignalRSample.Models
@@ -10,6 +11,7 @@ namespace SignalRSample.Models
         public Guid UserId { get; set; }
 
         [Required]
+        [DisplayName("Name")]
         public string FullName { get; set; } = string.Empty;
 
         [Required]

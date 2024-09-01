@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SignalRSample.Migrations
+namespace DrawingBoard.Migrations
 {
     /// <inheritdoc />
     public partial class init : Migration
@@ -15,9 +15,9 @@ namespace SignalRSample.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FullName = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -28,10 +28,10 @@ namespace SignalRSample.Migrations
                 name: "Boards",
                 columns: table => new
                 {
-                    BoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    BoardId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -48,9 +48,9 @@ namespace SignalRSample.Migrations
                 name: "CanvasObjects",
                 columns: table => new
                 {
-                    ObjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ObjectData = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    ObjectId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ObjectData = table.Column<string>(type: "text", nullable: false),
+                    BoardId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -72,6 +72,12 @@ namespace SignalRSample.Migrations
                 name: "IX_CanvasObjects_BoardId",
                 table: "CanvasObjects",
                 column: "BoardId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
         }
 
         /// <inheritdoc />

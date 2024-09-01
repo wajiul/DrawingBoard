@@ -89,7 +89,6 @@ initializeObserver('#main-shape > *', config, (target, attributeName) => {
     else if (shapeClass.includes('pentagon')) {
         currentShape = 'pentagon';
     }
-    console.log(currentShape);
     drawShape(currentShape);
 });
 
@@ -99,6 +98,7 @@ pen.addEventListener('click', function () {
     canvas.freeDrawingBrush.width = Math.floor(currentLineWidth.value);
     canvas.freeDrawingBrush.color = currentColor;
     canvas.isDrawingMode = true;
+    eraserMode = false;
 });
 
 
@@ -112,6 +112,7 @@ eraser.addEventListener('click', function () {
     canvas.freeDrawingBrush = new fabric.EraserBrush(canvas);
     canvas.freeDrawingBrush.width = currentEraserWidth.value * 5;
     canvas.isDrawingMode = true;
+    eraserMode = true;
 });
 
 currentEraserWidth.addEventListener('input', function () {
@@ -202,7 +203,6 @@ function drawRectangle() {
 
 selectionPointer.addEventListener('click', function () {
     canvas.isDrawingMode = false;
-    console.log('selection');
 });
 
 /* Object change section */

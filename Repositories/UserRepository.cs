@@ -28,6 +28,13 @@ namespace SignalRSample.Repositories
         {
             return await _context.Users.FirstOrDefaultAsync(e => e.Email == email); 
         }
+
+        public async Task UpdateNameAsync(Guid userId, string name)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            user.FullName = name;
+
+        }
         public async Task SaveAsync()
         {
             await _context.SaveChangesAsync();

@@ -3,7 +3,6 @@
 document.querySelectorAll('.position-control').forEach(e => {
     // console.log(e);
     e.addEventListener('click', function (button) {
-        console.log(e.id);
         moveToolbar(e.id);
     });
 });

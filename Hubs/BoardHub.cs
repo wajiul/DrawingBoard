@@ -2,8 +2,6 @@
 using SignalRSample.Models;
 using SignalRSample.Repositories;
 using System.Text.Json;
-using System.Text.RegularExpressions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace SignalRSample.Hubs
 {
@@ -49,7 +47,6 @@ namespace SignalRSample.Hubs
             var canvas = await GetCanvasJsonString(canvasObject.BoardId);
 
             UndoStack[groupId].Push(canvas);
-
             await Clients.Group(groupId).SendAsync("ReceiveCanvasObject", canvasObject);
         }
 

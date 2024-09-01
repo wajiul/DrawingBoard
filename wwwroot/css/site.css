@@ -174,7 +174,7 @@
 .title-container {
     position: fixed;
     top: 0;
-    left: 3rem;
+    left: 7rem;
     width: auto;
     max-width: 20rem;
     height: 25px;
@@ -230,9 +230,10 @@
 /* Toolber position control */
 .toolbar-position-control {
     position: fixed;
-    top: 0.5rem;
-    right:10rem;
-    z-index: 999;
+    top: 4px;
+    left: 3rem;
+    z-index: 99999;
+    border-radius: 50%;
 }
 
 
@@ -248,7 +249,7 @@
 #menu-toggler {
     position: fixed;
     left: 0.5rem;
-    top: 1rem;
+    top: 0.5rem;
     z-index: 999;
 }
 

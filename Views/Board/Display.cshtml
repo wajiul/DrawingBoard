@@ -5,6 +5,15 @@
     string shareLink = ViewBag.ShareLink;
     string userId = ViewBag.UserId;
     bool isShared = string.IsNullOrEmpty(userId);
+    string userName = "";
+    if(isShared)
+    {
+        userName = ViewBag.UserName;
+    }
+    else
+    {
+        userName = Model.UserName + " (host)";
+    }
 }
 
 <div class="title-container shadow">
@@ -13,7 +22,7 @@
     </span>
 </div>
 
-<div class="dropdown">
+<div class="dropdown bg-white p-1">
     <button class="round-btn"
             type="button"
             id="menu-toggler"
@@ -28,16 +37,23 @@
             
             <li>
                 <a 
-                    asp-action="AddNewBoard" asp-controller="Board" asp-route-userId="@Model.UserId" 
+                    asp-action="NewBoard" asp-controller="Board" asp-route-userId="@userId" 
                     class="dropdown-item"> <i class="bi bi-plus me-2"></i>New
                 </a>
             </li>
 
             <li>
                 <a 
-                    asp-action="MyBoard" asp-controller="Board" asp-route-userId="@Model.UserId"
+                    asp-action="MyBoard" asp-controller="Board" asp-route-userId="@userId"
                     class="dropdown-item">
                     <i class="bi bi-person-circle me-2"></i>My board
+                </a>
+            </li>
+
+            <li>
+                <a asp-action="Library" asp-controller="Board" asp-route-userId="@userId"
+                   class="dropdown-item">
+                    <i class="bi bi-folder2-open me-2"></i>Library
                 </a>
             </li>
         }
@@ -52,67 +68,50 @@
                 <i class="bi bi-person-plus-fill me-2"></i>Add collaborator
             </a>
         </li>
-        <li>
-            <a 
-                asp-action="Library" asp-controller="Board"
-                class="dropdown-item">
-                <i class="bi bi-folder2-open me-2"></i>Library
-            </a>
-        </li>
-        <li>
-            <a class="dropdown-item">
-                <i class="bi bi-arrow-clockwise me-2"></i>Reset canvas
-            </a>
-        </li>
+        
     </ul>
 </div>
 
 <!-- Menu section end  -->
 <!-- Toolbar section start  -->
 
-<div class="dropdown toolbar-position-control p-2">
+<div class="dropdown toolbar-position-control p-1">
     <button 
-        class="round-btn round-btn__small dropdown-toggle" 
+        class="round-btn dropdown-toggle" 
         id="left"
         value="left" 
         data-bs-toggle="dropdown" aria-expanded="false"
     >
-        <i class="bi bi-align-start"></i>
+        <i class="bi bi-dpad" style="margin-left:2px;"></i>
     </button>
 
     <ul class="dropdown-menu custom-dropdown-width px-1">
         <li class="mb-1">
-            <button class="round-btn round-btn__small position-control" id="top">
+            <button class="round-btn position-control" id="left">
+                <i class="bi bi-align-start"></i>
+            </button>
+        </li>
+        <li class="mb-1">
+            <button class="round-btn position-control" id="top">
                 <i class="bi bi-align-top"></i>
             </button>
         </li>
         <li class="mb-1">
-            <button class="round-btn round-btn__small position-control" id="top">
-                <i class="bi bi-align-top"></i>
+            <button class="round-btn position-control" id="right">
+                <i class="bi bi-align-end"></i>
+            </button>
+        </li>
+        <li class="mb-1">
+            <button class="round-btn position-control" id="bottom">
+                <i class="bi bi-align-bottom"></i>
             </button>
         </li>
     </ul>
-
 </div>
 
 
 
- @* <div class="toolbar-position-control">
-     <button class="round-btn round-btn__small position-control"
-             id="left"
-             value="left">
-         <i class="bi bi-align-start"></i>
-     </button>
-     <button class="round-btn round-btn__small position-control" id="top">
-         <i class="bi bi-align-top"></i>
-     </button>
-     <button class="round-btn round-btn__small position-control" id="right">
-         <i class="bi bi-align-end"></i>
-     </button>
-     <button class="round-btn round-btn__small position-control" id="bottom">
-         <i class="bi bi-align-bottom"></i>
-     </button>
- </div> *@
+
 
 <div id="toolbar" class="toolbar toolbar__left">
     <div class="tool-container mb-1">
@@ -120,9 +119,7 @@
             <i class="bi bi-pen"></i>
         </button>
         <div class="tool-options tool-options__left">
-            <!-- <button class="tool-btn pen"><i class="bi bi-pen"></i></button>
-                  <button class="tool-btn pen"><i class="bi bi-pencil"></i></button>
-                  <button class="tool-btn pen"><i class="bi bi-brush"></i></button> -->
+           
         </div>
     </div>
     <div class="tool-container mb-1">
@@ -352,13 +349,14 @@
     function copyToClipboard() {
         var input = document.getElementById("sharedLink");
         input.select();
-        input.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(input.value).then(function () {
-            console.log('text copied');
-        }, function (err) {
+        input.setSelectionRange(0, 99999); // For mobile devices
+        try {
+            var successful = document.execCommand('copy');
+        } catch (err) {
             console.error('Could not copy text: ', err);
-        });
+        }
     }
+
 
 </script>
 @section Scripts {
@@ -378,7 +376,7 @@
 
             const sharedUser = @isShared.ToString().ToLower();
             const boardId = '@Model.BoardId';
-            const userName = '@Model.UserName';
+            const userName = '@userName';
 
             const toast = document.getElementById('toast');
 
@@ -392,7 +390,7 @@
             async function startConnection() {
                 try {
                     await connection.start();
-                    console.log("SignalR Connected.");
+                    
                 } catch (err) {
                     console.error("Error starting connection: ", err);
                     setTimeout(startConnection, 5000);
@@ -408,7 +406,7 @@
             async function joinBoard(boardId, userName) {
                 try {
                     await connection.invoke("JoinBoard", boardId, userName);
-                    console.log(`${userName} joined board ${boardId}`);
+                    
                 } catch (err) {
                     console.error("Error joining board: ", err);
                 }
@@ -419,7 +417,7 @@
             async function leaveBoard(boardId, userName) {
                 try {
                     await connection.invoke("LeaveBoard", boardId, userName);
-                    console.log(`${userName} left board ${boardId}`);
+                   
                 } catch (err) {
                     console.error("Error leaving board: ", err);
                 }
@@ -467,7 +465,6 @@
             async function sendObjectChange(canvasObj) {
                 try {
                     await connection.invoke("AddOrUpdateObject", canvasObj);
-                    // console.log(`Object ${canvasObj.objectId} change sent to board ${canvasObj.boardId}`);
                 } catch (err) {
                     console.error("Error sending object change: ", err);
                 }
@@ -476,7 +473,6 @@
             async function deleteObject(boardId, objectId) {
                 try {
                     await connection.invoke("DeleteObject", boardId, objectId);
-                    console.log(`Object ${objectId} deleted from board ${boardId}`);
                 } catch (err) {
                     console.error("Error deleting object: ", err);
                 }
@@ -494,7 +490,6 @@
                 try {
                     
                     const usersInGroup = await connection.invoke("UsersInGroup", boardId);
-                    console.log("Users in group:", usersInGroup);
                     // You can perform additional actions with the usersInGroup data
                 } catch (err) {
                     console.error("Error invoking UsersInGroup:", err.toString());
@@ -502,7 +497,6 @@
             });
 
             connection.on('userLeft', async (user) => {
-                console.log(user, 'left the board');
 
                 let toaster = new bootstrap.Toast(document.getElementById('toast'));
                 document.getElementById('toastBody').innerHTML = `<strong>${user}</strong> left the board`;
@@ -511,7 +505,6 @@
                 try {
                     // Invoke a method on the server to get users in the group
                     const usersInGroup = await connection.invoke("UsersInGroup", boardId);
-                    console.log("Users in group:", usersInGroup);
                     // You can perform additional actions with the usersInGroup data
                 } catch (err) {
                     console.error("Error invoking UsersInGroup:", err.toString());
@@ -524,12 +517,10 @@
 
 
             connection.on('ReceiveUndoRedoState', (canvasData) => {
-                console.log('undo redo state', canvasData);
                 var canvasObjects = canvasData.canvasObjects;
                 isLoadingCanvas = true;
                 canvas.clear();
                 canvasObjects.forEach(obj => {
-                    console.log('canvas -> ', obj);
                     applyObjectChange(obj.objectId, obj.objectData);
                 });
                 isLoadingCanvas = false;
@@ -539,15 +530,9 @@
 
 
             connection.on('receiveUsersInGroup', (group) => {
-               
                 let peopleCount = document.getElementById('people-count');
-                if(peopleCount > 1) {
-                    peopleCount.textContent = group.length;
-                }
-                else {
-                    $('#people-count').hide();
-                }
-
+                peopleCount.textContent = group.length;
+                
                 peopleList = document.getElementById('shared-people');
                 peopleList.innerHTML = '';
 
@@ -566,20 +551,15 @@
                 });
             });
 
-            connection.on('receiveCanvasObject', (canvasObj) => {
-                console.log('receved canvas object');
-                console.log(canvasObj);
+            connection.on('ReceiveCanvasObject', (canvasObj) => {
                 applyObjectChange(canvasObj.objectId, canvasObj.objectData);
             });
 
             connection.on('ReceiveDeletedCanvasObjectId', (objectId) => {
-                console.log('delete obj id ', objectId);
                 deleteCanvasObject(objectId);
             });
 
             connection.on('receiveSavedDrawing', (value) => {
-                console.log('reveice saved drawing');
-                console.log(JSON.parse(value));
                 isLoadingCanvas = true;
                 canvas.loadFromJSON(value, () => {
                     canvas.renderAll();
@@ -589,7 +569,6 @@
 
 
             connection.on('ReceiveTitle', (title) => {
-                console.log('received title > ', title);
                 $boardTitle.text(title);
             });
 
@@ -622,7 +601,6 @@
                     objectData: objectData,
                     boardId: boardId
                 };
-
                 sendObjectChange(canvasObj);
             });
 
@@ -638,7 +616,6 @@
             function applyObjectChange(objectId, objectData) {
                 fabric.util.enlivenObjects([JSON.parse(objectData)], function (objects) {
                     if (objects.length > 0) {
-                        // console.log('apply -->', objects);
                         const object = objects[0];
                         isLoadingCanvas = true;
                         const existingObject = canvas.getObjectById(objectId);
@@ -676,11 +653,8 @@
                 try {
                     const board = await connection.invoke("GetBoard", boardId);
                     const canvasObjects = board.canvasObjects;
-                    console.log(board);
-                    console.log(canvasObjects);
                     canvasObjects.forEach(obj => {
                         applyObjectChange(obj.objectId, obj.objectData);
-                        // console.log(obj);
                     });
                 } catch (err) {
                     console.error('Error getting initial drawing:', err);
@@ -724,7 +698,14 @@
                 }
             });
 
+            let eraser = false;
+            $('#eraser').click(function () {
+                eraser = true;
+            });
 
+            $('#main-pen, #main-shape').click(function () {
+                eraser = false;
+            });
 
         });
 
