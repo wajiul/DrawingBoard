@@ -59,6 +59,20 @@ namespace SignalRSample.Repositories
                 }).FirstOrDefaultAsync();
         }
 
+        public async Task<BoardModel?> GetBoardDetailsWithoutCanvasAsync(Guid boardId)
+        {
+            return await _context.Boards
+                .Where(b => b.BoardId == boardId)
+                .Select(b => new BoardModel
+                {
+                    BoardId = b.BoardId.ToString(),
+                    UserId = b.UserId.ToString(),
+                    Title = b.Title,
+                    Date = b.Date
+                })
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<BoardModel>> GetBoardsDetailsWithoutCanvasAsync(Guid userId)
         {
            return await _context.Boards
@@ -113,6 +127,18 @@ namespace SignalRSample.Repositories
                     CanvasObjects = b.CanvasObjects
 
                 }).ToListAsync();
+        }
+
+        public async Task<BoardCanvasModel?> GetBoardCanvasAsync(Guid boardId)
+        {
+            return await _context.Boards
+                .Where(b => b.BoardId == boardId)
+                .Select(b => new BoardCanvasModel
+                {
+                    BoardId = b.BoardId.ToString(),
+                    CanvasObjects = b.CanvasObjects
+                })
+                .FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<BoardCanvasModel>> GetBoardCanvasOfAllUserAsync()
@@ -171,6 +197,11 @@ namespace SignalRSample.Repositories
                 board.Title = title;
                 _context.Boards.Update(board);
             }
+        }
+
+        public async Task<bool> DoesBoardExist(Guid boardId, Guid userId)
+        {
+            return await _context.Boards.AnyAsync(b => b.BoardId == boardId && b.UserId == userId);
         }
 
         public async Task DeleteBoardAsync(Guid boardId)

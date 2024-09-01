@@ -1,0 +1,102 @@
+﻿@model BoardModel
+
+<div style="display:none;">
+    <canvas id="canvas"></canvas>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-sm-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-white">
+                    <h1 class="text-center">Are you sure ?</h1>
+                </div>
+                <div class="card-body">
+                     <img id="@Model.BoardId" class="card-img-top"/>
+                    <div class="text-center">
+                        <p class="p-0 m-0">@Model.Title</p>
+                        <p class="p-0 m-0">@Model.Date.ToString("dd MMM, yyyy")</p>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <form asp-action="DeleteConfirmed" method="post" asp-route-userId="@Model.UserId">
+                        <input asp-for="@Model.BoardId" type="hidden"/>
+                        <div class="d-flex flex-column flex-sm-row gap-1 justify-content-center align-items-center">
+                            <button class="btn btn-danger w-50" type="submit">Delete</button>
+                            <a asp-action="MyBoard" asp-route-userId="@Model.UserId" class="btn btn-dark w-50">Back To List</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/fabric.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            const canvas = new fabric.Canvas('canvas', {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                backgroundColor: '#fff'
+            });
+
+
+            async function getCanvasThumbnail(canvasData) {
+                await loadCanvasFromDb(canvasData);
+
+                let dataURL = canvas.toDataURL({
+                    format: 'png',
+                    quality: 1.0
+                });
+                return dataURL;
+            }
+
+            function applyObjectChange(objectId, objectData) {
+                fabric.util.enlivenObjects([JSON.parse(objectData)], function (objects) {
+                    if (objects.length > 0) {
+                        const object = objects[0];
+                        canvas.add(object);
+                        canvas.renderAll();
+                    }
+                });
+            }
+
+            async function loadCanvasFromDb(canvasObjects) {
+                canvasObjects.forEach(obj => {
+                    applyObjectChange(obj.objectId, obj.objectData);
+                });
+
+            }
+
+            async function showBoardImage(board) {
+                console.log('b', board);
+                const imgSrc = await getCanvasThumbnail(board.canvasObjects);
+                console.log(board.boardId);
+                const ch = $(`#${board.boardId}`);
+                console.log('ch', ch);
+                $(`#${board.boardId}`).attr('src', imgSrc);
+            }
+
+            function getBoardCanvas() {
+                $.ajax({
+                    url: `GetBoardCanvas?boardId=@Model.BoardId`,
+                    method: 'GET',
+                    contentType: 'application/json',
+                    success: function (response) {
+                        showBoardImage(response);
+                    }
+                });
+            }
+
+            getBoardCanvas();
+        });
+
+    </script>
+
+}

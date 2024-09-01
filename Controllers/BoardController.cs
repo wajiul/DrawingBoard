@@ -73,6 +73,30 @@ namespace DrawingBoard.Controllers
         }
 
 
+        public async Task<IActionResult> Delete(string boardId, string userId)
+        {
+            var boardExist = await _boardRepository.DoesBoardExist(new Guid(boardId),new Guid(userId));
+            if(!boardExist)
+            {
+                return NotFound();
+            }
+            var board = await _boardRepository.GetBoardDetailsWithoutCanvasAsync(new Guid(boardId));
+            ViewData["UserId"] = userId;
+            return View(board);
+        }
+
+
+        public async Task<IActionResult> DeleteConfirmed(string boardId, string userId)
+        {
+            if(string.IsNullOrEmpty(boardId))
+            {
+                return NotFound();
+            }
+            await _boardRepository.DeleteBoardAsync(new Guid(boardId));
+            await _boardRepository.SaveAsync();
+            return RedirectToAction("MyBoard", new { userId });
+        }
+
         public async Task<IActionResult> MyBoard(string userId)
         {
             var boards = await _boardRepository.GetBoardsDetailsWithoutCanvasAsync(new Guid(userId));
@@ -85,7 +109,6 @@ namespace DrawingBoard.Controllers
         [HttpGet]
         public IActionResult Share(string Id)
         {
-
             var boardUser = new BoardUser
             {
                 BoardId = Id
@@ -140,6 +163,17 @@ namespace DrawingBoard.Controllers
             var allCanvas = await _boardRepository.GetBoardCanvasOfAllUserAsync();
             return Ok(allCanvas);   
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetBoardCanvas(string boardId)
+        {
+            if(string.IsNullOrEmpty(boardId))
+            {
+                return NotFound();
+            }
+            var canvas = await _boardRepository.GetBoardCanvasAsync(new Guid(boardId));
+            return Ok(canvas);
+        } 
 
         [HttpGet]
         public async Task<IActionResult> GetUserAllBoards(string userId)
